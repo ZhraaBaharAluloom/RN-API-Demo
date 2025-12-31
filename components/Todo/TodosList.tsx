@@ -1,23 +1,36 @@
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { TodoTypes } from "@/data/todos";
+import { getAllTodos } from "@/api/todos";
+import { useQuery } from "@tanstack/react-query";
 import AddTodo from "./AddTodo";
 import TodoCard from "./TodoCard";
 
 const TodosList = () => {
-  const [todoData, setTodoData] = useState<TodoTypes[]>([]);
+  // const [todoData, setTodoData] = useState<TodoTypes[]>([]);
 
-  const handleAddTodo = async (newTodo: string) => {};
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["todos"],
+    queryFn: getAllTodos,
+    retry: 3,
+  });
+  console.log("🚀 ~ TodosList ~ data:", data);
 
-  let todoList = todoData.map((todo) => <TodoCard todo={todo} key={todo.id} />);
+  if (isLoading) return <ActivityIndicator />;
+  let todoList = data?.map((todo) => <TodoCard todo={todo} key={todo.id} />);
 
   return (
     <View style={styles.todosContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>todos</Text>
       </View>
-      <AddTodo placeholder="Add New Todo :)" handlePress={handleAddTodo} />
+      <AddTodo placeholder="Add New Todo :)" />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         style={styles.listContainer}

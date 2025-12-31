@@ -1,3 +1,5 @@
+import { createTodo } from "@/api/todos";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import CustomizedButton from "../Button/CustomizedButton";
@@ -10,18 +12,26 @@ interface AddTodoProps {
 const AddTodo = ({ placeholder, handlePress }: AddTodoProps) => {
   const [inputValue, setInputValue] = useState<string>("");
 
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationKey: ["createTodo"],
+    mutationFn: () =>
+      createTodo({ todo: inputValue, completed: false, userId: 9 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+
   return (
     <View style={styles.inputContainer}>
       <TextInput
         style={styles.inputField}
-        value={inputValue}
+        // value={inputValue}
         placeholder={placeholder}
-        onChangeText={(value) => setInputValue(value)}
+        // onChangeText={(value) => setInputValue(value)}
+        onChangeText={(e) => console.log(e)}
       />
-      <CustomizedButton
-        title="Add"
-        handlePress={() => handlePress && handlePress(inputValue)}
-      />
+      <CustomizedButton title="Add" handlePress={mutate} />
     </View>
   );
 };
